@@ -1,0 +1,8 @@
+[GIN] 2025/11/11 - 20:52:51 | 200 |     170.834µs |             ::1 | GET      "/cex/start/mexc"
+[GIN] 2025/11/11 - 20:52:54 | 200 |      56.083µs |             ::1 | GET      "/cex/stats/mexc"
+[GIN] 2025/11/11 - 20:53:02 | 200 |       40.75µs |             ::1 | GET      "/cex/stats/mexc"
+[GIN] 2025/11/11 - 20:53:08 | 200 |      57.333µs |             ::1 | GET      "/cex/stop/mexc"
+[PAPRIKA]: 2025/11/11 20:53:08 manager.go:64: [INFO]: process with pid 'mexc' stopped gracefully
+[GIN] 2025/11/11 - 20:53:28 | 200 |      93.917µs |             ::1 | GET      "/cex/stats/mexc"
+[GIN] 2025/11/11 - 20:55:21 | 400 |      85.625µs |             ::1 | GET      "/cex/start/mexc"
+[GIN] 2025/11/11 - 20:55:30 | 400 |      43.209µs |             ::1 | GET      "/cex/start/mexc1"
