@@ -1,8 +1,28 @@
-[GIN] 2025/11/11 - 20:52:51 | 200 |     170.834µs |             ::1 | GET      "/cex/start/mexc"
-[GIN] 2025/11/11 - 20:52:54 | 200 |      56.083µs |             ::1 | GET      "/cex/stats/mexc"
-[GIN] 2025/11/11 - 20:53:02 | 200 |       40.75µs |             ::1 | GET      "/cex/stats/mexc"
-[GIN] 2025/11/11 - 20:53:08 | 200 |      57.333µs |             ::1 | GET      "/cex/stop/mexc"
-[PAPRIKA]: 2025/11/11 20:53:08 manager.go:64: [INFO]: process with pid 'mexc' stopped gracefully
-[GIN] 2025/11/11 - 20:53:28 | 200 |      93.917µs |             ::1 | GET      "/cex/stats/mexc"
-[GIN] 2025/11/11 - 20:55:21 | 400 |      85.625µs |             ::1 | GET      "/cex/start/mexc"
-[GIN] 2025/11/11 - 20:55:30 | 400 |      43.209µs |             ::1 | GET      "/cex/start/mexc1"
+[GIN] 2025/11/15 - 16:42:24 | 200 |     287.625µs |             ::1 | GET      "/cex/start/mexc"
+[PAPRIKA]: 2025/11/15 16:42:26 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957809133e+06 IsVolumeUsdt:false Timestamp:1763221342977}
+  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221346255}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:28 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957809133e+06 IsVolumeUsdt:false Timestamp:1763221345975}
+  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221346255}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:28 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221348322}
+  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957809133e+06 IsVolumeUsdt:false Timestamp:1763221345975}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:30 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221348917}
+  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221348322}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:30 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37680.342877 IsVolumeUsdt:false Timestamp:1763221350152}
+  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221348917}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:32 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37680.342877 IsVolumeUsdt:false Timestamp:1763221350152}
+  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221348917}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:32 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221351909}
+  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37680.342877 IsVolumeUsdt:false Timestamp:1763221350152}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:34 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221352217}
+  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221351909}
+  Value: 1.994930
+[PAPRIKA]: 2025/11/15 16:42:34 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221351909}
+  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221352217}
+  Value: 1.994930

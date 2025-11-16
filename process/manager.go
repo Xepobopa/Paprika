@@ -1,7 +1,7 @@
 package process
 
 import (
-	"Paprika/publisher"
+	"Paprika/models"
 	"context"
 	"fmt"
 	"log"
@@ -9,9 +9,8 @@ import (
 )
 
 type Manager struct {
-	p  map[string]IProcess // {"pid": IProcess}
-	pb *publisher.Publisher
-
+	p     map[string]IProcess // {"pid": IProcess}
+	ch    chan *models.Ticker
 	stats *GlobalInformation
 
 	wg     sync.WaitGroup
@@ -19,12 +18,12 @@ type Manager struct {
 	cancel context.CancelFunc
 }
 
-func NewManager(ctx context.Context, pb *publisher.Publisher) *Manager {
+func NewManager(ctx context.Context) *Manager {
 	ctx, cancel := context.WithCancel(ctx)
 
 	return &Manager{
 		p:      make(map[string]IProcess),
-		pb:     pb,
+		ch:     make(chan *models.Ticker, 5000),
 		stats:  newGlobalInformation(),
 		ctx:    ctx,
 		cancel: cancel,
@@ -56,9 +55,9 @@ func (this *Manager) Spawn(pid string, process IProcess) error {
 		}()
 
 		this.stats.start(pid)
-		if err := this.get(pid).Do(this.ctx, this.pb); err != nil {
-			err = err
-			log.Printf("[ERROR]: process with pid '%s' stopped with error: %v", pid, err)
+		if er := this.get(pid).Do(this.ctx, this.ch); er != nil {
+			err = er
+			log.Printf("[ERROR]: process with pid '%s' stopped with error: %v", pid, er)
 			return
 		}
 		log.Printf("[INFO]: process with pid '%s' stopped gracefully", pid)
@@ -84,6 +83,7 @@ func (this *Manager) StopAll() {
 
 	this.wg.Wait()                     // wait to all process stop
 	this.p = make(map[string]IProcess) // clean up
+	close(this.ch)
 }
 
 func (this *Manager) Stop(pid string) error {

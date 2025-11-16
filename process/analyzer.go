@@ -2,7 +2,6 @@ package process
 
 import (
 	"Paprika/models"
-	"Paprika/publisher"
 	"context"
 	"log"
 	"math"
@@ -13,17 +12,15 @@ type Analyzer struct {
 	ctxCancel context.CancelFunc
 
 	ticks map[string]*models.Ticker
-
-	ch chan *models.Ticker
 }
 
 func SpawnAnalyzerProcess() *Analyzer {
 	return &Analyzer{
-		ch: make(chan *models.Ticker, 5000),
+		ticks: make(map[string]*models.Ticker),
 	}
 }
 
-func (this *Analyzer) Do(globalCtx context.Context, pb *publisher.Publisher) error {
+func (this *Analyzer) Do(globalCtx context.Context, ch chan *models.Ticker) error {
 	ctx, cancel := context.WithCancel(globalCtx)
 	this.ctx = ctx
 	this.ctxCancel = cancel
@@ -33,7 +30,7 @@ func (this *Analyzer) Do(globalCtx context.Context, pb *publisher.Publisher) err
 		case <-this.ctx.Done():
 			return nil
 
-		case tick, ok := <-this.ch:
+		case tick, ok := <-ch:
 			if !ok {
 				this.Stop()
 				return nil
@@ -41,7 +38,7 @@ func (this *Analyzer) Do(globalCtx context.Context, pb *publisher.Publisher) err
 			if tick.Volume < models.MIN_VOLUME {
 				continue
 			}
-			
+
 			// save
 			this.ticks[this.key(tick.Exchange, tick.Market, tick.Symbol)] = tick
 
@@ -51,7 +48,7 @@ func (this *Analyzer) Do(globalCtx context.Context, pb *publisher.Publisher) err
 				continue
 			}
 			// send to the tg bot
-			log.Printf("SPREAD: %+v", spread)
+			log.Printf("SPREAD: FROM %+v\n  TO: %+v\n  Value: %f", *spread.From, *spread.To, spread.Value)
 		}
 	}
 }
@@ -66,11 +63,11 @@ func (this *Analyzer) compare(t *models.Ticker) (*models.Spread, bool) {
 	if t.Market == models.SPOT {
 		otherTick, ok = this.ticks[this.key(t.Exchange, models.FUTURES, t.Symbol)]
 	}
-
 	if !ok {
 		return nil, false
 	}
-	spread := this.calcMidPrice(t.Ask, t.Bid) - this.calcMidPrice(otherTick.Ask, otherTick.Bid)
+
+	spread := this.calcSpread(this.calcMidPrice(t.Ask, t.Bid), this.calcMidPrice(otherTick.Ask, otherTick.Bid))
 	if math.Abs(spread) <= models.MIN_SPREAD {
 		return nil, false // too little spread, return false
 	}
@@ -82,6 +79,10 @@ func (this *Analyzer) compare(t *models.Ticker) (*models.Spread, bool) {
 
 func (this *Analyzer) key(exchange, market, symbol string) string {
 	return exchange + market + symbol
+}
+
+func (this *Analyzer) calcSpread(x, y float64) float64 {
+	return math.Abs(x-y) / this.calcMidPrice(x, y)
 }
 
 // return a mid price between ask and bid

@@ -1,13 +1,13 @@
 package process
 
 import (
-	"Paprika/publisher"
+	"Paprika/models"
 	"context"
 )
 
 type IProcess interface {
 	// ctx - a global context from a process manager. You need to create an individual context inside process using parent one.
-	Do(ctx context.Context, pb *publisher.Publisher) error
+	Do(ctx context.Context, ch chan *models.Ticker) error
 	Stop() error
 }
 
@@ -16,4 +16,3 @@ type IProcess interface {
 // 	ctx    context.Context // create a private context from a global
 // 	cancel context.CancelFunc
 // }
-

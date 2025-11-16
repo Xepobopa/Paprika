@@ -3,10 +3,11 @@ package process
 import (
 	"Paprika/exchange"
 	"Paprika/models"
-	"Paprika/publisher"
 	"context"
 	"fmt"
+	"log"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -18,9 +19,9 @@ type Mexc struct {
 	// spotClient *exchange.Client    ??
 	// futuresClient *exchange.Client ??
 
-	ctx context.Context
+	ctx       context.Context
 	ctxCancel context.CancelFunc
-	
+
 	wg sync.WaitGroup
 	mu sync.Mutex
 }
@@ -33,12 +34,12 @@ func SpawnMexcProcess() *Mexc {
 		// spotClient: exchange.NewClient(60, 1, time.Second * 5),
 		// // every second
 		// futuresClient: exchange.NewClient(60, 1, time.Second * 5),
-		
+
 		api: api,
 	}
 }
 
-func (this *Mexc) Do(globalCtx context.Context, pb *publisher.Publisher) error {
+func (this *Mexc) Do(globalCtx context.Context, ch chan *models.Ticker) error {
 	// create private context
 	ctx, cancel := context.WithCancel(globalCtx)
 	this.ctx = ctx
@@ -48,11 +49,11 @@ func (this *Mexc) Do(globalCtx context.Context, pb *publisher.Publisher) error {
 	this.wg.Add(2)
 	go func() {
 		defer this.wg.Done()
-		errCh <- this.fetchSpotLoop(ctx, pb)
+		errCh <- this.fetchSpotLoop(this.ctx, ch)
 	}()
 	go func() {
 		defer this.wg.Done()
-		errCh <- this.fetchFuturesLoop(ctx, pb)
+		errCh <- this.fetchFuturesLoop(this.ctx, ch)
 	}()
 
 	// Wait for both goroutines to finish
@@ -73,8 +74,8 @@ func (this *Mexc) Do(globalCtx context.Context, pb *publisher.Publisher) error {
 	return nil
 }
 
-func (this *Mexc) fetchSpotLoop(ctx context.Context, pb *publisher.Publisher) error {
-	ticker := time.NewTicker(time.Second)
+func (this *Mexc) fetchSpotLoop(ctx context.Context, ch chan *models.Ticker) error {
+	ticker := time.NewTicker(time.Second * 2)
 	defer ticker.Stop()
 
 	for {
@@ -93,45 +94,45 @@ func (this *Mexc) fetchSpotLoop(ctx context.Context, pb *publisher.Publisher) er
 			tickersSpot, err := this.api.Fetch24hTickerStats(ctx)
 			if err != nil {
 				// stop process and return the error
+				log.Println("%+V", err)
 				return fmt.Errorf("failed to make 'FetchTickers' request in MEXC SPOT, reason: %v", err)
 			}
 
 			// cast to the unified Ticker
-			payloadSpot := make([]models.Ticker, 0, len(tickersSpot))
 			for _, tick := range tickersSpot {
 				normalizedTick, err := this.normalizeSpotTicker(tick)
 				if err != nil {
-					return fmt.Errorf("failed to normalize (string -> float64) MEXC SPOT tick: ", err)
+					return fmt.Errorf("failed to normalize (string -> float64) MEXC SPOT tick: %v", err)
 				}
 
-				payloadSpot = append(payloadSpot, normalizedTick)
-			}
+				if normalizedTick.Ask == 0 || normalizedTick.Bid == 0 || normalizedTick.Volume == 0 {
+					continue
+				}
 
-			// publish
-			if err := pb.PublishTickers("cex.mexc.spot", &payloadSpot); err != nil {
-				return fmt.Errorf("failed to publish mexc spot shapshot: %v", err)
+				// send to the channels
+				ch <- normalizedTick
 			}
 		}
 	}
 }
 
-func (this *Mexc) normalizeSpotTicker(tick models.MexcTickerStats) (models.Ticker, error) {
+func (this *Mexc) normalizeSpotTicker(tick models.MexcTickerStats) (*models.Ticker, error) {
 	ask, err := strconv.ParseFloat(tick.AskPrice, 64)
 	if err != nil {
-		return models.Ticker{}, err
+		return nil, err
 	}
 	bid, err := strconv.ParseFloat(tick.BidPrice, 64)
 	if err != nil {
-		return models.Ticker{}, err
+		return nil, err
 	}
 	volume, err := strconv.ParseFloat(tick.QuoteVolume, 64)
 	if err != nil {
-		return models.Ticker{}, err
+		return nil, err
 	}
-	
+
 	// todo: cast volume to usdt
 
-	return models.Ticker{
+	return &models.Ticker{
 		Exchange:  models.MEXC,
 		Market:    models.SPOT,
 		Symbol:    tick.Symbol,
@@ -142,8 +143,8 @@ func (this *Mexc) normalizeSpotTicker(tick models.MexcTickerStats) (models.Ticke
 	}, nil
 }
 
-func (this *Mexc) fetchFuturesLoop(ctx context.Context, pb *publisher.Publisher) error {
-	ticker := time.NewTicker(time.Second)
+func (this *Mexc) fetchFuturesLoop(ctx context.Context, ch chan *models.Ticker) error {
+	ticker := time.NewTicker(time.Second * 2)
 	defer ticker.Stop()
 
 	for {
@@ -159,32 +160,32 @@ func (this *Mexc) fetchFuturesLoop(ctx context.Context, pb *publisher.Publisher)
 				return fmt.Errorf("failed to make 'FetchTickers' request in MEXC FUTURES (SWAP), reason: %v", err)
 			}
 
-			payloadFutures := make([]models.Ticker, 0, len(tickersFutures.Data))
 			for _, tick := range tickersFutures.Data {
-
 				normalizedTick, err := this.normalizeFuturesTicker(tick)
 				if err != nil {
-					return fmt.Errorf("failed to normalize (string -> float64) MEXC FUTURES tick: ", err)
+					return fmt.Errorf("failed to normalize (string -> float64) MEXC FUTURES tick: %v", err)
 				}
 
-				payloadFutures = append(payloadFutures, normalizedTick)
+				if normalizedTick.Ask == 0 || normalizedTick.Bid == 0 || normalizedTick.Volume == 0 {
+					continue
+				}
+				
+				// send to the channel
+				ch <- normalizedTick
 			}
 
-			if err := pb.PublishTickers("cex.mexc.futures", &payloadFutures); err != nil {
-				return fmt.Errorf("failed to publish mexc futures shapshot: %v", err)
-			}
 		}
 	}
 }
 
-func (this *Mexc) normalizeFuturesTicker(tick models.MexcContractTick) (models.Ticker, error) {
-	return models.Ticker{
+func (this *Mexc) normalizeFuturesTicker(tick models.MexcContractTick) (*models.Ticker, error) {
+	return &models.Ticker{
 		Exchange:  models.MEXC,
-		Market:    models.SPOT,
-		Symbol:    tick.Symbol,
+		Market:    models.FUTURES,
+		Symbol:    strings.ReplaceAll(tick.Symbol, "_", ""), // BTC_USDT -> BTCUSDT
 		Ask:       tick.Ask1,
 		Bid:       tick.Bid1,
-		Volume:    tick.Amount24H, // amount is a quote volume (and pray that quote is a usdt)
+		Volume:    tick.Amount24H, // amount is a quote volume (not always in usdt)
 		Timestamp: tick.Timesamp,
 	}, nil
 }
@@ -192,5 +193,6 @@ func (this *Mexc) normalizeFuturesTicker(tick models.MexcContractTick) (models.T
 func (this *Mexc) Stop() error {
 	this.ctxCancel()
 	this.wg.Wait()
+
 	return nil
 }
