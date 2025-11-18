@@ -34,7 +34,7 @@ func Run(config *utils.Config, customWriter io.Writer) error {
 	}()
 
 	pm := process.NewManager(ctx)
-	pm.Spawn("anallyzer", process.SpawnAnalyzerProcess(pub))
+	pm.Spawn("analyzer", process.SpawnAnalyzerProcess(pub))
 
 	router.ApplyExchangeRouter(server, pm)
 

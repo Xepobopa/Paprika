@@ -6,7 +6,7 @@ type Ticker struct {
 	Symbol       string  `json:"symbol"`
 	Ask          float64 `json:"ask"`    // ask1 for futures and bestAsk for spot
 	Bid          float64 `json:"bid"`    // bid1 for futures and bestBid for spot
-	Volume       float64 `json:"volume"` // 24h
+	Volume       float64 `json:"volume"` // can be empty (zero) sometimes if market == 'futures'
 	IsVolumeUsdt bool    `json:"isVolumeUsdt"`
 	Timestamp    int64   `json:"timestamp"` // when snapshot was received (closeTime for spot and timestamp for futures)
 }

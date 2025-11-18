@@ -16,3 +16,6 @@ type IProcess interface {
 // 	ctx    context.Context // create a private context from a global
 // 	cancel context.CancelFunc
 // }
+
+// common exchange process logic is here
+// type BaseProcess struct {

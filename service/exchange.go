@@ -7,15 +7,18 @@ import (
 )
 
 func GetAllAvailableExchanges() []string {
-	return []string{models.MEXC}
+	return []string{models.MEXC, models.KUCOIN}
 }
 
 func SpawnExchangeProcess(name string, pm *process.Manager) error {
 	switch name {
 
-	case "mexc":
+	case models.MEXC:
 		return pm.Spawn(name, process.SpawnMexcProcess())
-
+	
+	case models.KUCOIN:
+		return pm.Spawn(name, process.SpawnKucoinProcess())
+		
 	default:
 		// unknown exchange name
 		return fmt.Errorf("provided exchange name '%s' is not supported!", name)

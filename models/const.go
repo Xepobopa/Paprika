@@ -1,6 +1,7 @@
 package models
 
 const MEXC = "mexc"
+const KUCOIN = "kucoin"
 
 const FUTURES = "futures"
 const SPOT = "spot"

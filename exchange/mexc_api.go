@@ -34,3 +34,14 @@ func (api *MexcApi) Fetch24hTickerStats(ctx context.Context) ([]models.MexcTicke
 		Get("https://api.mexc.com/api/v3/ticker/24hr") // api.cfg.Mexc.API.SPOT_TICKERS_24HR
 	return res, err
 }
+
+// MapperMexcToSpot accepts base and quote tokens and returns a specific mexc spot pair string.
+//
+// BTCUSDT
+func MapperMexcSpot(base, quote string) string {
+	return base + quote
+}
+
+func MapperMexcFutures(base, quote string) string {
+	return base + "_" + quote
+}
