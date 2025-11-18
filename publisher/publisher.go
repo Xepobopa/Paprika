@@ -1,69 +1,148 @@
-// The purpose of this pakcage is to connect to the nats server and send all data to the nats
 package publisher
 
 import (
 	"Paprika/models"
-	"encoding/json"
+	"Paprika/publisher/pb"
 	"fmt"
+	"log"
+	"net"
+	"strings"
 	"sync"
 
-	"github.com/nats-io/nats.go"
+	"google.golang.org/grpc"
 )
 
-type Publisher struct {
-	conn *nats.Conn
+type Topic string
 
-	mu sync.Mutex
+type Publisher struct {
+	pb.UnimplementedPaprikaServer
+
+	listener   net.Listener
+	grpcServer *grpc.Server
+
+	mu         sync.RWMutex
+	subscibers map[string]pb.Paprika_GetSpreadStreamServer
 }
 
-func NewPublisher(serverUrl string) (*Publisher, error) {
-	conn, err := nats.Connect(serverUrl)
+func New(port string) (*Publisher, error) {
+	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot create gRPC server: %v", err)
 	}
 
-	return &Publisher{conn: conn}, nil
+	pub := &Publisher{
+		listener:   listener,
+		subscibers: make(map[string]pb.Paprika_GetSpreadStreamServer),
+	}
+
+	s := grpc.NewServer()
+	pb.RegisterPaprikaServer(s, pub)
+	pub.grpcServer = s
+
+	return pub, nil
 }
 
-// Publish - send a provided message to the connected NATS server with a provided subject
+// Creates a gRPC server
 //
-// TODO: add protobuf
-func (p *Publisher) Publish(subject string, data interface{}) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+// 'port' argument should not be with ':', just "1234"
+func (this *Publisher) Listen() error {
+	return this.grpcServer.Serve(this.listener)
+}
 
-	payload, err := json.Marshal(data)
-	if err != nil {
+func (this *Publisher) GetSpreadStream(req *pb.StreamRequest, stream pb.Paprika_GetSpreadStreamServer) error {
+	this.mu.Lock()
+	if _, exist := this.subscibers[req.GetTopic()]; exist {
+		return fmt.Errorf("failed to add stream with topic '%s', because stream with this topic already exists", req.GetTopic())
+	}
+
+	this.subscibers[req.GetTopic()] = stream
+	log.Printf("New Client with topic: %s", req.GetTopic())
+	this.mu.Unlock()
+
+	defer func() {
+		this.mu.Lock()
+		delete(this.subscibers, req.GetTopic())
+		this.mu.Unlock()
+	}()
+
+	<-stream.Context().Done()
+	return stream.Context().Err()
+}
+
+func (this *Publisher) PublishSpread(msgTopic string, spread *models.Spread) {
+	spreadProto := this.spreadToProto(msgTopic, spread)
+
+	this.mu.RLock()
+	defer this.mu.RUnlock()
+
+	for streamTopic, stream := range this.subscibers {
+		log.Printf("Pattern: %s | Topic: %s", streamTopic, msgTopic)
+		if this.matchTopic(msgTopic, streamTopic) {
+			go stream.Send(spreadProto)
+		}
+	}
+}
+
+// cex.futures.mexc.BTCUSDT | cex.*.futures | cex.futures.>
+//
+// Wildcast pattern like in NATS
+func (this *Publisher) matchTopic(topic, pattern string) bool {
+	t := strings.Split(topic, ".")
+	p := strings.Split(pattern, ".")
+
+	ti := 0
+	pi := 0
+
+	for pi < len(p) {
+		pp := p[pi]
+
+		if pp == ">" {
+			// only allowed at the end
+			return pi == len(p)-1
+		}
+
+		if ti >= len(t) {
+			return false
+		}
+
+		if pp != "*" && pp != t[ti] {
+			return false
+		}
+
+		pi++
+		ti++
+	}
+
+	return ti == len(t)
+}
+
+func (this *Publisher) spreadToProto(topic string, spread *models.Spread) *pb.MsgSpread {
+	return &pb.MsgSpread{
+		Topic:  topic,
+		To:     this.tickerToProto(spread.To),
+		From:   this.tickerToProto(spread.From),
+		Spread: spread.Value,
+	}
+}
+
+func (this *Publisher) tickerToProto(tick *models.Ticker) *pb.MsgTicker {
+	return &pb.MsgTicker{
+		Exchange:     tick.Exchange,
+		Market:       tick.Market,
+		Symbol:       tick.Symbol,
+		Ask:          tick.Ask,
+		Bid:          tick.Bid,
+		Volume:       tick.Volume,
+		IsVolumeUsdt: tick.IsVolumeUsdt,
+		Timestamp:    tick.Timestamp,
+	}
+}
+
+func (this *Publisher) Stop() error {
+	this.grpcServer.GracefulStop()
+	if err := this.listener.Close(); err != nil {
 		return err
 	}
-	if err := p.conn.Publish(subject, payload); err != nil {
-		return nil
-	}
 
 	return nil
-}
-
-// PublishTickers - because the main services, that will publish messages are exhanges 
-// (and exchanges just fetch a lot of data every second), its more convenient to pass an array of messages
-//
-// TODO: add protobuf
-func (p *Publisher) PublishTickers(subject string, data *[]models.Ticker) error {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	for _, elem := range *data {
-		payload, err := json.Marshal(elem)
-		if err != nil {
-			return fmt.Errorf("failed to marshal the element in the provided object with a subject '%s': ", subject, err)
-		}
-		if err := p.conn.Publish(subject, payload); err != nil {
-			return fmt.Errorf("failed to publish message with a subject '%s': %v", subject, err)
-		}
-	}
-
-	return nil
-}
-
-func (p *Publisher) Close() {
-	p.conn.Close()
 }

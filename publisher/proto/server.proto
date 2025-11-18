@@ -1,0 +1,33 @@
+// protoc --go_out=pb --go_opt=paths=source_relative --go-grpc_out=pb --go-grpc_opt=paths=source_relative publisher/proto/server.proto
+
+syntax = "proto3";
+
+package pb;
+option go_package = "github.com/Xepobopa/Paprika/publisher/pb";
+
+message StreamRequest {
+    string topic = 1; // cex | cex > futures | cex > futures > symbol. Only 'cex' is supporting now
+}
+message MsgTicker {
+    string exchange = 1;
+    string market = 2;
+    string symbol = 3;
+
+    double ask = 4;
+    double bid = 5;
+    double volume = 6;
+    bool isVolumeUsdt = 7;
+
+    int64 timestamp = 8;
+}
+message MsgSpread {
+    string topic = 1;
+    double spread = 4;
+    MsgTicker to = 2;
+    MsgTicker from = 3;
+}
+
+
+service Paprika {
+    rpc GetSpreadStream(StreamRequest) returns (stream MsgSpread);
+}

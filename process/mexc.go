@@ -77,6 +77,7 @@ func (this *Mexc) Do(globalCtx context.Context, ch chan *models.Ticker) error {
 func (this *Mexc) fetchSpotLoop(ctx context.Context, ch chan *models.Ticker) error {
 	ticker := time.NewTicker(time.Second * 2)
 	defer ticker.Stop()
+	
 
 	for {
 		select {

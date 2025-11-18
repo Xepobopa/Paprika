@@ -1,28 +1,20 @@
-[GIN] 2025/11/15 - 16:42:24 | 200 |     287.625µs |             ::1 | GET      "/cex/start/mexc"
-[PAPRIKA]: 2025/11/15 16:42:26 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957809133e+06 IsVolumeUsdt:false Timestamp:1763221342977}
-  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221346255}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:28 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957809133e+06 IsVolumeUsdt:false Timestamp:1763221345975}
-  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221346255}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:28 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221348322}
-  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957809133e+06 IsVolumeUsdt:false Timestamp:1763221345975}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:30 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221348917}
-  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221348322}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:30 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37680.342877 IsVolumeUsdt:false Timestamp:1763221350152}
-  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221348917}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:32 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37680.342877 IsVolumeUsdt:false Timestamp:1763221350152}
-  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221348917}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:32 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221351909}
-  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37680.342877 IsVolumeUsdt:false Timestamp:1763221350152}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:34 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221352217}
-  TO: {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221351909}
-  Value: 1.994930
-[PAPRIKA]: 2025/11/15 16:42:34 analyzer.go:51: SPREAD: FROM {Exchange:mexc Market:futures Symbol:XUSDT Ask:2.768e-05 Bid:2.711e-05 Volume:1.9957904053e+06 IsVolumeUsdt:false Timestamp:1763221351909}
-  TO: {Exchange:mexc Market:spot Symbol:XUSDT Ask:0.021639 Bid:0.021537 Volume:37690.342857 IsVolumeUsdt:false Timestamp:1763221352217}
-  Value: 1.994930
+[GIN] 2025/11/17 - 17:25:26 | 200 |            0s |             ::1 | GET      "/cex/start/mexc"
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:59: New Client with topic: cex.>
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.TEAFIUSDT
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.KAITOUSDT
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.KAITOUSDC
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.TEAFIUSDT
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.KAITOUSDT
+[PAPRIKA]: 2025/11/17 17:25:30 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.KAITOUSDC
+[PAPRIKA]: 2025/11/17 17:25:32 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.TEAFIUSDT
+[PAPRIKA]: 2025/11/17 17:25:32 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.KAITOUSDT
+[PAPRIKA]: 2025/11/17 17:25:32 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.KAITOUSDC
+[PAPRIKA]: 2025/11/17 17:25:32 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.TEAFIUSDT
+[PAPRIKA]: 2025/11/17 17:25:32 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.KAITOUSDT
+[PAPRIKA]: 2025/11/17 17:25:32 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.KAITOUSDC
+[PAPRIKA]: 2025/11/17 17:25:34 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.TEAFIUSDT
+[PAPRIKA]: 2025/11/17 17:25:34 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.KAITOUSDT
+[PAPRIKA]: 2025/11/17 17:25:34 publisher.go:79: Pattern: cex.> | Topic: cex.futures.mexc.KAITOUSDC
+[PAPRIKA]: 2025/11/17 17:25:34 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.TEAFIUSDT
+[PAPRIKA]: 2025/11/17 17:25:34 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.KAITOUSDT
+[PAPRIKA]: 2025/11/17 17:25:34 publisher.go:79: Pattern: cex.> | Topic: cex.spot.mexc.KAITOUSDC

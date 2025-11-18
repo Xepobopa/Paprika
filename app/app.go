@@ -2,10 +2,13 @@ package app
 
 import (
 	"Paprika/process"
+	"Paprika/publisher"
 	"Paprika/router"
 	"Paprika/utils"
 	"context"
+	"fmt"
 	"io"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,14 +19,22 @@ func Run(config *utils.Config, customWriter io.Writer) error {
 	server.Use(gin.LoggerWithWriter(customWriter))
 	server.Use(gin.Recovery())
 
-	// pb, err := publisher.NewPublisher(config.Nats.URL)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to connect to the nats server: %v", err)
-	// }
-
 	ctx := context.Background()
+
+	pub, err := publisher.New("5011")
+	if err != nil {
+		return fmt.Errorf("failed to start grpc server: %v", err)
+	}
+	go func() {
+		if err := pub.Listen(); err != nil {
+			log.Printf("Publisher error: %v", err)
+			pub.Stop()
+			return
+		}
+	}()
+
 	pm := process.NewManager(ctx)
-	pm.Spawn("anallyzer", process.SpawnAnalyzerProcess())
+	pm.Spawn("anallyzer", process.SpawnAnalyzerProcess(pub))
 
 	router.ApplyExchangeRouter(server, pm)
 

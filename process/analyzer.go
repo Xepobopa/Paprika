@@ -2,21 +2,23 @@ package process
 
 import (
 	"Paprika/models"
+	"Paprika/publisher"
 	"context"
-	"log"
 	"math"
 )
 
 type Analyzer struct {
 	ctx       context.Context
 	ctxCancel context.CancelFunc
+	pub       *publisher.Publisher
 
 	ticks map[string]*models.Ticker
 }
 
-func SpawnAnalyzerProcess() *Analyzer {
+func SpawnAnalyzerProcess(pub *publisher.Publisher) *Analyzer {
 	return &Analyzer{
 		ticks: make(map[string]*models.Ticker),
+		pub:   pub,
 	}
 }
 
@@ -40,15 +42,20 @@ func (this *Analyzer) Do(globalCtx context.Context, ch chan *models.Ticker) erro
 			}
 
 			// save
-			this.ticks[this.key(tick.Exchange, tick.Market, tick.Symbol)] = tick
+			this.ticks[this.key(tick.Market, tick.Exchange, tick.Symbol)] = tick
 
 			// compare
 			spread, ok := this.compare(tick)
 			if !ok {
 				continue
 			}
+			if spread.To.Symbol == "XUSDT" {
+				continue
+			}
+
 			// send to the tg bot
-			log.Printf("SPREAD: FROM %+v\n  TO: %+v\n  Value: %f", *spread.From, *spread.To, spread.Value)
+			// log.Printf("SPREAD: FROM %+v\n  TO: %+v\n  Value: %f", *spread.From, *spread.To, spread.Value)
+			this.pub.PublishSpread(spread.GetTopic(), spread)
 		}
 	}
 }
@@ -58,10 +65,10 @@ func (this *Analyzer) compare(t *models.Ticker) (*models.Spread, bool) {
 	var otherTick *models.Ticker
 	var ok bool
 	if t.Market == models.FUTURES {
-		otherTick, ok = this.ticks[this.key(t.Exchange, models.SPOT, t.Symbol)]
+		otherTick, ok = this.ticks[this.key(models.SPOT, t.Exchange, t.Symbol)]
 	}
 	if t.Market == models.SPOT {
-		otherTick, ok = this.ticks[this.key(t.Exchange, models.FUTURES, t.Symbol)]
+		otherTick, ok = this.ticks[this.key(models.FUTURES, t.Exchange, t.Symbol)]
 	}
 	if !ok {
 		return nil, false
